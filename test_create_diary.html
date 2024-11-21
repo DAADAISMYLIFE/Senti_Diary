@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diary 생성</title>
+</head>
+<body>
+  <h1>Diary 생성</h1>
+  <form id="diaryForm">
+    <label for="title">제목:</label><br>
+    <input type="text" id="title" name="title" required><br><br>
+    
+    <label for="content">내용:</label><br>
+    <textarea id="content" name="content" rows="4" required></textarea><br><br>
+    
+    <label for="viewScope">공개 여부:</label><br>
+    <input type="radio" id="public" name="viewScope" value="true" required>
+    <label for="public">공개</label><br>
+    <input type="radio" id="private" name="viewScope" value="false">
+    <label for="private">비공개</label><br><br>
+    
+    <button type="submit">생성</button>
+  </form>
+
+  <p id="responseMessage" style="color: green; font-weight: bold;"></p>
+  <p id="errorMessage" style="color: red;"></p>
+
+  <script>
+    document.getElementById('diaryForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      const viewScope = document.querySelector('input[name="viewScope"]:checked').value === 'true';
+
+      try {
+        const response = await fetch('http://localhost:8000/diaries', { // 적절한 API 경로 입력
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content, viewScope })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          document.getElementById('responseMessage').textContent = result.message;
+          document.getElementById('errorMessage').textContent = '';
+        } else {
+          const error = await response.json();
+          document.getElementById('responseMessage').textContent = '';
+          document.getElementById('errorMessage').textContent = error.error || 'Error occurred';
+        }
+      } catch (error) {
+        console.error(error);
+        document.getElementById('responseMessage').textContent = '';
+        document.getElementById('errorMessage').textContent = '서버와 연결할 수 없습니다.';
+      }
+    });
+  </script>
+</body>
+</html>

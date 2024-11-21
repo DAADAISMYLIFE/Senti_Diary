@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 router.get('/', async (req, res) => {
     try {
         const diaries = await Diary.findAll({
-            attributes: ['userId', 'title', 'title', 'content']
+            attributes: ['userId', 'title', 'title', 'content', 'view_scope']
         });
         res.status(200).json(diaries)
     }
@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
     try {
         const jsonData = req.body;
         const createdDiary = await Diary.create({
-            userId: 4,
+            userId: 1,
             title: jsonData.title,
             content: jsonData.content,
             viewScope: jsonData.viewScope,
@@ -31,7 +31,8 @@ router.post('/', async (req, res) => {
 
         // 응답으로 받은 데이터를 다시 전송합니다.
         res.status(200).json({
-            message: 'diary가 생성되었습니다.'
+            message: 'diary가 생성되었습니다.',
+            detail : createdDiary
         });
     }
     catch (error) {

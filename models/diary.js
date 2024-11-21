@@ -10,7 +10,7 @@ class Diary extends Sequelize.Model {
             },
 
             content: {
-                type: Sequelize.STRING,
+                type: Sequelize.TEXT,
                 allowNull: false,
             },
 
@@ -45,8 +45,8 @@ class Diary extends Sequelize.Model {
             sequelize,
             timestamps: true,
             underscored: true,
-            charset: 'utf8',
-            collate: 'utf8_general_ci',
+            charset: 'utf8mb3',
+            collate: 'utf8mb3_general_ci',
         });
     }
 

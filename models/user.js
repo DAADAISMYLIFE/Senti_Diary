@@ -10,6 +10,11 @@ class User extends Sequelize.Model {
                 unique: true,
             },
 
+            passwordSalt: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+
             password: {
                 type: Sequelize.STRING,
                 allowNull: false,

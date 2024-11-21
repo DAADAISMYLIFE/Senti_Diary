@@ -1,3 +1,6 @@
+const dotenv = requier("dotenv");
+dotenv.config();
+
 const express = require("express");
 const { sequelize } = require("./models");
 const userRouter = require("./routes/userRouter.js");

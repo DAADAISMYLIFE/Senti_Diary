@@ -19,3 +19,5 @@ const production = {
   "host": process.env.MYSQL_HOST,
   "dialect": "mysql"
 };
+
+module.exports = {development, test, production};

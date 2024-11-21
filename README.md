@@ -7,8 +7,8 @@
 npm i
 ```
 
-### 2. config/config.json 파일 수정
-config.json 내 development 내용을 본인에게 맞는 user와 password로 설정해야함
+### 2. .env 파일 생성/수정
+.env 파일을 생성하여 DB 정보를 입력합니다.
 
 ### 3. 실행
 ```bash

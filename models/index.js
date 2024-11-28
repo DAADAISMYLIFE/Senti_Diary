@@ -1,5 +1,7 @@
 const User = require('./user');
 const Diary = require('./diary');
+const Weather = require('./weather');
+
 
 const fs = require('fs');
 const path = require('path');
@@ -23,8 +25,11 @@ db.Sequelize = Sequelize;
 
 db.User = User;
 db.Diary = Diary;
+db.Weather = Weather;
+
 
 User.initiate(sequelize);
 Diary.initiate(sequelize);
+Weather.initiate(sequelize);
 
 module.exports = db;

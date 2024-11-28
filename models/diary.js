@@ -40,6 +40,16 @@ class Diary extends Sequelize.Model {
             },
 
             // 날씨 외래키 연결해야함
+            weatherId: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+                references: {
+                    model: 'Weathers', // 연결된 테이블 이름 (Weather 모델의 테이블 이름)
+                    key: 'id'
+                },
+                onDelete: 'SET NULL', // 연관된 날씨가 삭제되도 유지되어야 함
+                onUpdate: 'SET NULL'
+            },
 
         }, {
             sequelize,
@@ -52,6 +62,8 @@ class Diary extends Sequelize.Model {
 
     static associate(db) {
         db.Diary.belongsTo(db.User, { foreignKey: 'userId', targetKey: 'id' });
+        db.Diary.hasOne(db.Weather, { foreignKey: 'weatherId', targetKey: 'id' });
+
     }
 }
 

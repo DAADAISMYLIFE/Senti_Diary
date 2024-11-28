@@ -12,6 +12,7 @@ const development_mysql = {
   "host": process.env.MYSQL_HOST,
   "dialect": "mysql"
 };
+
 const test = {
   "username": process.env.MYSQL_USERNAME,
   "password": process.env.MYSQL_PASSWORD,

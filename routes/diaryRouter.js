@@ -41,4 +41,28 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.post('/', async (req, res) => {
+    try {
+        const jsonData = req.body;
+        const createdDiary = await Diary.create({
+            userId: 1,
+            title: jsonData.title,
+            content: jsonData.content,
+            viewScope: jsonData.viewScope,
+        })
+
+        console.log(jsonData.title);
+
+        // 응답으로 받은 데이터를 다시 전송합니다.
+        res.status(200).json({
+            message: 'diary가 생성되었습니다.',
+            detail : createdDiary
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 module.exports = router;

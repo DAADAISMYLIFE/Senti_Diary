@@ -43,11 +43,12 @@ router.get('/', async (req, res) => {
 router.post('/register', upload.single('profileImage'), async (req, res) => {
     try {
         const { email, password, nickname } = req.body;
-
-        // 업로드된 파일 경로 처리
-
-        const profileImageUrl = `http://localhost:8000/media/${req.file.filename}` // 파일 경로
-
+        const profileImageUrl = null;
+        console.log(req.file)
+        if (req.file != null) {
+            // 업로드된 파일 경로 처리
+            profileImageUrl = `http://localhost:8000/media/${req.file.filename}` // 파일 경로
+        }
         //비밀번호 해시를 위한 솔트
         const salt = crypto.randomBytes(128).toString('base64');
         const hashPassword = crypto.createHash('sha512').update(password + salt).digest('hex');

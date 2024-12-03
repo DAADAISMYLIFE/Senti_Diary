@@ -32,4 +32,8 @@ User.initiate(sequelize);
 Diary.initiate(sequelize);
 Weather.initiate(sequelize);
 
+User.associate(db);
+Diary.associate(db);
+Weather.associate(db);
+
 module.exports = db;

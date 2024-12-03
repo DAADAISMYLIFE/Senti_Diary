@@ -9,11 +9,10 @@ const router = express.Router();
 const { User } = require('../models');
 const { Op } = require('sequelize');
 
-
 // 저장 경로와 파일 이름 설정
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'media/'); // 파일 저장 폴더
+        cb(null, 'media/profile/'); // 파일 저장 폴더
     },
     filename(req, file, cb) {
         const randomID = uuid4();
@@ -23,33 +22,44 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|gif/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb('Error: File type not supported!');
+        }
+    }
+});
 
 router.get('/', async (req, res) => {
     try {
         const users = await User.findAll({
             attributes: ['email', 'nickname', 'profileImage']
         });
-        res.status(200).json(users)
-    }
-    catch (error) {
+        res.status(200).json(users);
+    } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-
-
 router.post('/register', upload.single('profileImage'), async (req, res) => {
     try {
         const { email, password, nickname } = req.body;
-        const profileImageUrl = null;
-        console.log(req.file)
-        if (req.file != null) {
+        let profileImageUrl = null; // let으로 선언
+
+        if (req.file) {
             // 업로드된 파일 경로 처리
-            profileImageUrl = `http://localhost:8000/media/${req.file.filename}` // 파일 경로
+            profileImageUrl = `http://localhost:8000/media/profile/${req.file.filename}`; // 파일 경로
         }
-        //비밀번호 해시를 위한 솔트
+
+        // 비밀번호 해시를 위한 솔트
         const salt = crypto.randomBytes(128).toString('base64');
         const hashPassword = crypto.createHash('sha512').update(password + salt).digest('hex');
 
@@ -63,7 +73,7 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
         });
 
         // 성공 응답
-        res.status(200).json({
+        res.status(201).json({
             message: 'user가 생성되었습니다.',
             detail: createdUser
         });
@@ -72,6 +82,5 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 
 module.exports = router;

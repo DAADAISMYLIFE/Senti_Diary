@@ -32,10 +32,10 @@ class Diary extends Sequelize.Model {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'Users', // 연결된 테이블 이름 (User 모델의 테이블 이름) 
+                    model: 'Users', 
                     key: 'id'
                 },
-                onDelete: 'CASCADE', // 연관된 사용자 삭제 시 다이어리도 삭제 
+                onDelete: 'CASCADE',  
                 onUpdate: 'CASCADE'
             },
 
@@ -44,10 +44,10 @@ class Diary extends Sequelize.Model {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'Weathers', // 연결된 테이블 이름 (Weather 모델의 테이블 이름)
+                    model: 'Weather', 
                     key: 'id'
                 },
-                onDelete: 'SET NULL', // 연관된 날씨가 삭제되도 유지되어야 함
+                onDelete: 'SET NULL',
                 onUpdate: 'SET NULL'
             },
 
@@ -62,7 +62,7 @@ class Diary extends Sequelize.Model {
 
     static associate(db) {
         db.Diary.belongsTo(db.User, { foreignKey: 'userId', targetKey: 'id' });
-        db.Diary.hasOne(db.Weather, { foreignKey: 'weatherId', targetKey: 'id' });
+        db.Diary.belongsTo(db.Weather, { foreignKey: 'weatherId', targetKey: 'id' });
 
     }
 }

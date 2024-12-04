@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png|gif/;
@@ -38,6 +38,18 @@ const upload = multer({
 });
 
 router.get('/', async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: ['email', 'nickname', 'profileImage']
+        });
+        res.status(200).json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.post('/login/', async (req, res) => {
     try {
         const users = await User.findAll({
             attributes: ['email', 'nickname', 'profileImage']

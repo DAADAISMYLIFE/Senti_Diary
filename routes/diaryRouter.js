@@ -6,10 +6,11 @@ const { Op } = require('sequelize');
 
 
 router.route('/')
+    // 다이어리 목록 조회
     .get(async (req, res) => {
         try {
             const diaries = await Diary.findAll({
-                attributes: ['userId', 'title', 'content', 'view_scope'],
+                attributes: ['id', 'userId', 'title', 'view_scope', 'created_at', 'updated_at'],
                 include: [{
                     model: Weather,
                     attributes: ['icon']
@@ -27,15 +28,11 @@ router.route('/')
     .post(async (req, res) => {
         try {
             const jsonData = req.body;
-            console.log(jsonData.title)
-            console.log(jsonData.content)
-            console.log(jsonData.weather)
-            console.log(jsonData.viewScope)
             const createdDiary = await Diary.create({
-                userId: 1, // 사용자 ID는 실제 사용자에 맞게 수정해야 합니다.
+                userId: 1, // TODO : 로그인 구현 이후 유저 아이디 넣기
                 title: jsonData.title,
                 content: jsonData.content,
-                weatherId: jsonData.weather, // 날씨 정보를 추가
+                weatherId: jsonData.weather,
                 viewScope: jsonData.viewScope,
             });
 
@@ -54,4 +51,58 @@ router.route('/')
     });
 
 
+router.route('/:id')
+    // 다이어리 개별 조회
+    .get(async (req, res) => {
+        try {
+            const diary = await Diary.findOne({
+                attributes: ['userId', 'title', 'content', 'view_scope', 'created_at', 'updated_at'],
+                include: [{
+                    model: Weather,
+                    attributes: ['icon']
+                }],
+                where: { id: req.params.id }
+            });
+
+            if (!diary) {
+                return res.status(404).json({ error: 'Diary not found' });
+            }
+
+            res.status(200).json(diary);
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    })
+
+    // 다이어리 수정
+    .put(async (req, res) => {
+        try {
+            const diaryId = req.params.id;
+            const updateData = req.body;
+
+            const diary = await Diary.update(updateData, { where: { id: diaryId } });
+
+            res.status(200).json(diary);
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    })
+
+    // 다이어리 삭제
+    .delete(async (req, res) => {
+        try {
+            const diaryId = req.params.id;
+            const diary = await Diary.destroy({ where: { id: diaryId } });
+
+            res.status(200).json({ 'detail': '삭제 되었습니다.' });
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    })
 module.exports = router;

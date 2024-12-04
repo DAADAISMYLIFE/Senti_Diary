@@ -1,38 +1,124 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Diary 생성</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px 30px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+      color: #555;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    input[type="radio"] {
+      margin-right: 5px;
+    }
+
+    .radio-group label {
+      display: inline-block;
+      margin-right: 20px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    p {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    p#responseMessage {
+      color: green;
+      font-weight: bold;
+    }
+
+    p#errorMessage {
+      color: red;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Diary 생성</h1>
-  <form id="diaryForm">
-    <label for="title">제목:</label><br>
-    <input type="text" id="title" name="title" required><br><br>
-    
-    <label for="content">내용:</label><br>
-    <textarea id="content" name="content" rows="4" required></textarea><br><br>
-    
-    <label for="weather">날씨:</label><br>
-    <select id="weather" name="weather" required>
-      <option value="" disabled selected>날씨를 선택하세요</option>
-      <option value="1">맑음</option>
-      <option value="2">구름</option>
-      <option value="3">비</option>
-    </select><br><br>
+  <div class="container">
+    <h1>Diary 생성</h1>
+    <form id="diaryForm">
+      <label for="title">제목</label>
+      <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
 
-    <label for="viewScope">공개 여부:</label><br>
-    <input type="radio" id="public" name="viewScope" value="true" required>
-    <label for="public">공개</label><br>
-    <input type="radio" id="private" name="viewScope" value="false">
-    <label for="private">비공개</label><br><br>
-    
-    <button type="submit">생성</button>
-  </form>
+      <label for="content">내용</label>
+      <textarea id="content" name="content" rows="4" placeholder="내용을 입력하세요" required></textarea>
 
-  <p id="responseMessage" style="color: green; font-weight: bold;"></p>
-  <p id="errorMessage" style="color: red;"></p>
+      <label for="weather">날씨</label>
+      <select id="weather" name="weather" required>
+        <option value="" disabled selected>날씨를 선택하세요</option>
+        <option value="1">맑음</option>
+        <option value="2">구름</option>
+        <option value="3">비</option>
+      </select>
+
+      <label>공개 여부</label>
+      <div class="radio-group">
+        <input type="radio" id="public" name="viewScope" value="true" required>
+        <label for="public">공개</label>
+
+        <input type="radio" id="private" name="viewScope" value="false">
+        <label for="private">비공개</label>
+      </div>
+
+      <button type="submit">생성</button>
+    </form>
+    <p id="responseMessage"></p>
+    <p id="errorMessage"></p>
+  </div>
 
   <script>
     document.getElementById('diaryForm').addEventListener('submit', async function(event) {
@@ -44,16 +130,17 @@
       const viewScope = document.querySelector('input[name="viewScope"]:checked').value === 'true';
 
       try {
-        const response = await fetch('http://localhost:8000/diaries', {
+        const response = await fetch('http://localhost:8000/api/v1/diaries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, content, weather, viewScope }) // 날씨 ID를 전송
+          body: JSON.stringify({ title, content, weather, viewScope })
         });
 
         if (response.ok) {
           const result = await response.json();
-          document.getElementById('responseMessage').textContent = result.message;
+          document.getElementById('responseMessage').textContent = result.message || 'Diary 생성 성공!';
           document.getElementById('errorMessage').textContent = '';
+          document.getElementById('diaryForm').reset();
         } else {
           const error = await response.json();
           document.getElementById('responseMessage').textContent = '';
@@ -67,4 +154,5 @@
     });
   </script>
 </body>
+
 </html>

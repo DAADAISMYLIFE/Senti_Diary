@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diary List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+    }
+
+    .diary {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .diary img {
+      max-width: 50px;
+      vertical-align: middle;
+    }
+
+    .diary .title {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .diary .view-scope {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .diary .date {
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Diaries</h1>
+  <div id="diary-list">
+    <!-- Diary entries will be dynamically inserted here -->
+  </div>
+
+  <script>
+    async function fetchDiaries() {
+      try {
+        const response = await fetch('http://localhost:3000/api/v1/diaries'); // API 경로 수정 필요
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const diaries = await response.json();
+        renderDiaries(diaries);
+      } catch (error) {
+        console.error('Error fetching diaries:', error);
+      }
+    }
+
+    function renderDiaries(diaries) {
+      const diaryList = document.getElementById('diary-list');
+      diaryList.innerHTML = ''; // 이전 데이터 초기화
+
+      diaries.forEach(diary => {
+        const diaryDiv = document.createElement('div');
+        diaryDiv.className = 'diary';
+
+        const basePath = 'http://localhost:3000/media/';
+        const weatherIconPath = `${basePath}${diary.Weather.icon}`;
+
+        diaryDiv.innerHTML = `
+          <a href="test_read_diary.html?id=${diary.id}" class="title">${diary.title}</a>
+          <div class="weather">
+            <strong>Weather:</strong> <img src="${weatherIconPath}" alt="Weather Icon">
+          </div>
+          <div class="view-scope">
+            <strong>View Scope:</strong> ${diary.view_scope === 1 ? 'Public' : 'Private'}
+          </div>
+          <div class="date">
+            <strong>Created At:</strong> ${diary.created_at}
+          </div>
+        `;
+
+        diaryList.appendChild(diaryDiv);
+      });
+    }
+
+    fetchDiaries();
+  </script>
+</body>
+
+</html>

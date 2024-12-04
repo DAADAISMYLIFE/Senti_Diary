@@ -32,10 +32,10 @@ class Diary extends Sequelize.Model {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'Users', 
+                    model: 'Users',
                     key: 'id'
                 },
-                onDelete: 'CASCADE',  
+                onDelete: 'CASCADE',
                 onUpdate: 'CASCADE'
             },
 
@@ -44,7 +44,7 @@ class Diary extends Sequelize.Model {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                    model: 'Weather', 
+                    model: 'Weather',
                     key: 'id'
                 },
                 onDelete: 'SET NULL',

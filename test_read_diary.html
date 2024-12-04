@@ -2,98 +2,259 @@
 <html lang="ko">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diary List</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      line-height: 1.6;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary Detail</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
 
-    .diary {
-      border: 1px solid #ccc;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
+        .diary-detail {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-    .diary img {
-      max-width: 50px;
-      vertical-align: middle;
-    }
+        .diary-detail h2 {
+            margin-top: 0;
+            color: #333;
+        }
 
-    .diary .title {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
+        .diary-detail img {
+            max-width: 100px;
+            display: block;
+            margin-top: 10px;
+        }
 
-    .diary .content {
-      margin-bottom: 10px;
-    }
+        .diary-detail .back {
+            margin-top: 20px;
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
 
-    .diary .view-scope {
-      font-size: 0.9em;
-      color: #555;
-    }
-  </style>
+        .edit-buttons {
+            margin-top: 20px;
+        }
+
+        .edit-buttons button {
+            margin-right: 10px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit-buttons .save {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .edit-buttons .delete {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .edit-buttons .cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .edit-buttons button:hover {
+            opacity: 0.9;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-  <h1>Diaries</h1>
-  <div id="diary-list">
-    <!-- Diary entries will be dynamically inserted here -->
-  </div>
+    <h1>Diary Detail</h1>
+    <div id="diary-detail" class="diary-detail">
+        <h2 id="detail-title">제목</h2>
+        <input type="text" id="edit-title">
+        <div id="detail-content"></div>
+        <textarea id="edit-content" rows="5"></textarea>
+        <img id="detail-weather" src="" alt="Weather Icon">
+        <select id="edit-weather">
+            <!-- 날씨 옵션은 동적으로 채워질 예정 -->
+        </select>
+        <div id="detail-date"></div>
+        <div class="edit-buttons">
+            <button id="edit-button">Edit</button>
+            <button id="save-button" class="save" style="display: none;">Save</button>
+            <button id="cancel-button" class="cancel" style="display: none;">Cancel</button>
+            <button id="delete-button" class="delete">Delete</button> <!-- 삭제 버튼 추가 -->
+        </div>
+        <div class="back" onclick="goBack()">← Back to List</div>
+    </div>
 
-  <script>
-    // Fetch data from the server
-    async function fetchDiaries() {
-      try {
-        const response = await fetch('http://localhost:8000/diaries'); // Update the URL if necessary
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    <script>
+        let isEditing = false;
+        let weatherList = []; // 날씨 목록 저장
+
+        async function fetchDiaryDetail(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/v1/diaries/${id}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const diary = await response.json();
+                renderDiaryDetail(diary);
+            } catch (error) {
+                console.error('Error fetching diary detail:', error);
+            }
         }
-        const diaries = await response.json();
-        renderDiaries(diaries);
-      } catch (error) {
-        console.error('Error fetching diaries:', error);
-      }
-    }
 
-    // Render diaries to the page
-    function renderDiaries(diaries) {
-      const diaryList = document.getElementById('diary-list');
-      diaryList.innerHTML = ''; // Clear previous content
+        async function fetchWeatherList() {
+            try {
+                const response = await fetch(`http://localhost:3000/weather`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                weatherList = await response.json();
+                populateWeatherDropdown();
+            } catch (error) {
+                console.error('Error fetching weather list:', error);
+            }
+        }
 
-      diaries.forEach(diary => {
-        const diaryDiv = document.createElement('div');
-        diaryDiv.className = 'diary';
+        function populateWeatherDropdown() {
+            const weatherSelect = document.getElementById('edit-weather');
+            const basePath = 'http://localhost:3000/media/';
 
-        const basePath = 'http://localhost:8000/media/'; // 기본 경로
-        const weatherIconPath = `${basePath}${diary.Weather.icon}`; // 완전한 이미지 URL
+            weatherList.forEach(weather => {
+                const option = document.createElement('option');
+                option.value = weather.id;
+                option.textContent = weather.name;
+                option.dataset.icon = `${basePath}${weather.icon}`; // 날씨 아이콘 경로 추가
+                weatherSelect.appendChild(option);
+            });
 
-        diaryDiv.innerHTML = `
-      <div class="title">${diary.title}</div>
-      <div class="content">${diary.content}</div>
-      <div class="weather">
-        <strong>Weather:</strong> <img src="${weatherIconPath}" alt="Weather Icon">
-      </div>
-      <div class="view-scope">
-        <strong>View Scope:</strong> ${diary.view_scope === 1 ? 'Public' : 'Private'}
-      </div>
-    `;
+            weatherSelect.addEventListener('change', (event) => {
+                const selectedOption = event.target.selectedOptions[0];
+                document.getElementById('detail-weather').src = selectedOption.dataset.icon;
+            });
+        }
 
-        diaryList.appendChild(diaryDiv);
-      });
+        function renderDiaryDetail(diary) {
+            const basePath = 'http://localhost:3000/media/';
+            const weatherIconPath = `${basePath}${diary.Weather.icon}`;
 
-    }
+            document.getElementById('detail-title').textContent = diary.title;
+            document.getElementById('edit-title').value = diary.title;
+            document.getElementById('detail-content').textContent = diary.content;
+            document.getElementById('edit-content').value = diary.content;
+            document.getElementById('detail-weather').src = weatherIconPath;
+            document.getElementById('edit-weather').value = diary.weatherId; // 선택된 날씨 설정
+            document.getElementById('detail-date').innerHTML = `
+        <strong>Created At:</strong> ${diary.created_at}<br>
+        <strong>Updated At:</strong> ${diary.updated_at}
+      `;
+        }
 
-    // Fetch and render diaries on page load
-    fetchDiaries();
-  </script>
+        function toggleEditMode(enable) {
+            isEditing = enable;
+            document.getElementById('detail-title').style.display = enable ? 'none' : 'block';
+            document.getElementById('edit-title').style.display = enable ? 'block' : 'none';
+            document.getElementById('detail-content').style.display = enable ? 'none' : 'block';
+            document.getElementById('edit-content').style.display = enable ? 'block' : 'none';
+            document.getElementById('detail-weather').style.display = enable ? 'none' : 'block';
+            document.getElementById('edit-weather').style.display = enable ? 'block' : 'none';
+
+            document.getElementById('edit-button').style.display = enable ? 'none' : 'inline-block';
+            document.getElementById('save-button').style.display = enable ? 'inline-block' : 'none';
+            document.getElementById('cancel-button').style.display = enable ? 'inline-block' : 'none';
+        }
+
+        async function saveDiary(id) {
+            const updatedTitle = document.getElementById('edit-title').value;
+            const updatedContent = document.getElementById('edit-content').value;
+            const updatedWeatherId = document.getElementById('edit-weather').value;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/v1/diaries/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: updatedTitle,
+                        content: updatedContent,
+                        weatherId: updatedWeatherId, // 날씨 정보 추가
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const updatedDiary = await response.json();
+                alert('Diary updated successfully!');
+                renderDiaryDetail(updatedDiary);
+                toggleEditMode(false);
+            } catch (error) {
+                console.error('Error updating diary:', error);
+                alert('Failed to update diary.');
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'test_read_diaries.html';
+        }
+
+        // URL에서 id 파라미터 가져오기
+        const params = new URLSearchParams(window.location.search);
+        const diaryId = params.get('id');
+        if (diaryId) {
+            fetchDiaryDetail(diaryId);
+            fetchWeatherList();
+        } else {
+            console.error('No diary ID provided in the URL.');
+        } async function deleteDiary(id) {
+            if (!confirm('정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/v1/diaries/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                alert(result.detail || '삭제되었습니다.');
+                window.location.href = 'test_read_diaries.html'; // 삭제 후 목록 페이지로 이동
+            } catch (error) {
+                console.error('Error deleting diary:', error);
+                alert('다이어리 삭제에 실패했습니다.');
+            }
+        }
+
+        document.getElementById('edit-button').addEventListener('click', () => toggleEditMode(true));
+        document.getElementById('cancel-button').addEventListener('click', () => toggleEditMode(false));
+        document.getElementById('save-button').addEventListener('click', () => saveDiary(diaryId));
+        document.getElementById('delete-button').addEventListener('click', () => deleteDiary(diaryId));
+    </script>
 </body>
 
 </html>

@@ -4,13 +4,6 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const morgan = require('morgan');
-const axios = require('axios');
-
-var client_id = process.env.NAVER_CLIENT_ID;
-var client_secret = process.env.NAVER_CLIENT_SECRET;
-var state = "RANDOM_STATE";
-var redirectURI = encodeURI(process.env.NAVER_CALLBACK_URL);
-var api_url = "";
 
 const { sequelize } = require("./models");
 const userRouter = require("./routes/userRouter.js");
@@ -68,55 +61,6 @@ app.use('/api/v1/diaries', diaryRouter);
 
 // 날씨 관련 URL
 app.use('/api/v1/weather', weatherRouter);
-app.get('/naverlogin', (req, res) => {
-    api_url = 'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=' + client_id + '&redirect_uri=' + redirectURI + '&state=' + state;
-    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
-    res.end("<a href='" + api_url + "'><img height='50' src='http://static.nid.naver.com/oauth/small_g_in.PNG'/></a>");
-});
-app.get('/callback', async (req, res) => {
-    console.log("Hello World");
-    const code = req.query.code;
-    const state = req.query.state;
-    const api_url = `https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirectURI}&code=${code}&state=${state}`;
-
-    try {
-        const response = await axios.get(api_url, {
-            headers: {
-                'X-Naver-Client-Id': client_id,
-                'X-Naver-Client-Secret': client_secret
-            }
-        });
-        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8' });
-        res.end(JSON.stringify(response.data));
-    } catch (error) {
-        res.status(error.response ? error.response.status : 500).end();
-        console.log('error = ' + (error.response ? error.response.status : 'Unknown error'));
-    }
-});
-
-
-app.get('/member', async (req, res) => {
-    const token = req.body.access_token;
-    const header = `Bearer ${token}`; // Bearer 다음에 공백 추가
-    const api_url = 'https://openapi.naver.com/v1/nid/me';
-
-    try {
-        const response = await axios.get(api_url, {
-            headers: { 'Authorization': header }
-        });
-        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8' });
-        res.end(JSON.stringify(response.data));
-    } catch (error) {
-        console.log('error');
-        if (error.response) {
-            res.status(error.response.status).end();
-            console.log('error = ' + error.response.status);
-        } else {
-            res.status(500).end();
-            console.log('error = Unknown error');
-        }
-    }
-});
 
 // 이외의 URL 404 처리
 app.use((req, res, next) => {

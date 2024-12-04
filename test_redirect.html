@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 처리 중...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="message">
+        <p>로그인 처리 중...</p>
+    </div>
+
+    <script>
+        // URL에서 인증 코드와 상태 값 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+
+        if (code) {
+            // 백엔드로 인증 코드 전송 (GET 요청으로 변경)
+            fetch(`http://127.0.0.1:3000/api/v1/users/oauth/login?code=${code}&state=${state}`, {
+                method: 'GET', // GET 요청
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('로그인 실패: ' + response.statusText);
+                    }
+                })
+                .then(data => {
+                    // 로그인 성공 후 처리 (예: 사용자 정보 저장, 페이지 리다이렉션 등)
+                    console.log('로그인 성공:', data);
+                    if (data.message === 'user가 생성되었습니다.') {
+                        // 회원가입 후 리다이렉트
+                        window.location.href = 'http://localhost:5500/test_read_diaries.html'; // 메인 페이지로 리다이렉트
+                    } else {
+                        // 기존 사용자 로그인 처리
+                        window.location.href = 'http://localhost:5500/test_read_diaries.html'; // 메인 페이지로 리다이렉트
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.querySelector('.message').textContent = '로그인에 실패했습니다. 다시 시도해 주세요.';
+                });
+        } else {
+            document.querySelector('.message').textContent = '인증 코드가 없습니다. 로그인 페이지로 돌아갑니다.';
+            setTimeout(() => {
+                window.location.href = 'http://localhost:5500/test_login.html'; // 로그인 페이지로 리다이렉트
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

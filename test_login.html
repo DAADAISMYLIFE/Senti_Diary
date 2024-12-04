@@ -1,26 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
-    <meta charset="utf-8">
-    <title>네이버 로그인</title>
-    <script type="text/javascript" src="https://static.nid.naver.com/js/naverLogin_implicit-1.0.3.js"
-        charset="utf-8"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>네이버 소셜 로그인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .login-container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-button {
+            background-color: #03c75a;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .login-button:hover {
+            background-color: #029c4b;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- 네이버 로그인 버튼 노출 영역 -->
-    <div id="naver_id_login"></div>
-    <!-- //네이버 로그인 버튼 노출 영역 -->
-    <script type="text/javascript">
-        var naver_id_login = new naver_id_login("do7zAMR7B6f3yAasQvpB", "http://127.0.0.1:3000");
-        var state = naver_id_login.getUniqState();
-        naver_id_login.setButton("white", 2, 40);
-        naver_id_login.setDomain("http://127.0.0.1:3000");
-        naver_id_login.setState(state);
-        naver_id_login.setPopup();
-        naver_id_login.init_naver_id_login();
+    <div class="login-container">
+        <h1>네이버 소셜 로그인</h1>
+        <button class="login-button" onclick="loginWithNaver()">네이버 로그인</button>
+    </div>
+
+    <script>
+        function loginWithNaver() {
+            // 네이버 로그인 URL (여기에서 client_id와 redirect_uri를 설정해야 합니다)
+            const client_id = 'do7zAMR7B6f3yAasQvpB'; // 네이버 개발자 센터에서 발급받은 클라이언트 ID
+            const redirect_uri = encodeURIComponent('http://127.0.0.1:5500/test_redirect.html'); // 리다이렉트 URI
+            const state = 'random_state_string'; // CSRF 방지용 랜덤 문자열
+
+            const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`;
+            window.location.href = naverAuthUrl; // 네이버 로그인 페이지로 리다이렉트
+        }
     </script>
+</body>
 
 </html>

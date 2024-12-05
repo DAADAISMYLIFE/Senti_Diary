@@ -34,35 +34,45 @@
         const state = urlParams.get('state');
 
         if (code) {
-            // 백엔드로 인증 코드 전송 (GET 요청으로 변경)
-            fetch(`http://127.0.0.1:3000/api/v1/users/oauth/login?code=${code}&state=${state}`, {
-                method: 'GET', // GET 요청
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('로그인 실패: ' + response.statusText);
+            // code가 한 번만 요청되도록 로컬 스토리지나 세션 스토리지 사용
+            if (!sessionStorage.getItem('code_used')) {
+                sessionStorage.setItem('code_used', 'true');
+
+                // 백엔드로 인증 코드 전송 (GET 요청으로 변경)
+                fetch(`http://127.0.0.1:3000/api/v1/users/oauth/login?code=${code}&state=${state}`, {
+                    method: 'GET', // GET 요청
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
                 })
-                .then(data => {
-                    // 로그인 성공 후 처리 (예: 사용자 정보 저장, 페이지 리다이렉션 등)
-                    console.log('로그인 성공:', data);
-                    if (data.message === 'user가 생성되었습니다.') {
-                        // 회원가입 후 리다이렉트
-                        window.location.href = 'http://localhost:5500/test_read_diaries.html'; // 메인 페이지로 리다이렉트
-                    } else {
-                        // 기존 사용자 로그인 처리
-                        window.location.href = 'http://localhost:5500/test_read_diaries.html'; // 메인 페이지로 리다이렉트
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.querySelector('.message').textContent = '로그인에 실패했습니다. 다시 시도해 주세요.';
-                });
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('로그인 실패: ' + response.statusText);
+                        }
+                    })
+                    .then(data => {
+                        // 로그인 성공 후 처리 (예: 사용자 정보 저장, 페이지 리다이렉션 등)
+                        console.log('로그인 성공:', data);
+                        if (data.message === 'user가 생성되었습니다.') {
+                            // 회원가입 후 리다이렉트
+                            window.location.href = 'http://localhost:5500/test_read_diaries.html'; // 메인 페이지로 리다이렉트
+                        } else {
+                            // 기존 사용자 로그인 처리
+                            window.location.href = 'http://localhost:5500/test_read_diaries.html'; // 메인 페이지로 리다이렉트
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.querySelector('.message').textContent = '로그인에 실패했습니다. 다시 시도해 주세요.';
+                    });
+            } else {
+                document.querySelector('.message').textContent = '인증 코드가 이미 사용되었습니다. 로그인 페이지로 돌아갑니다.';
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:5500/test_login.html'; // 로그인 페이지로 리다이렉트
+                }, 3000);
+            }
         } else {
             document.querySelector('.message').textContent = '인증 코드가 없습니다. 로그인 페이지로 돌아갑니다.';
             setTimeout(() => {

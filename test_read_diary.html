@@ -89,18 +89,24 @@
     <div id="diary-detail" class="diary-detail">
         <h2 id="detail-title">제목</h2>
         <input type="text" id="edit-title">
-        <div id="detail-content"></div>
+        <div id="detail-date"></div>
+        <div>
+            <pre id="detail-content"></pre>
+        </div>
         <textarea id="edit-content" rows="5"></textarea>
+        <div id="detail-emotion"></div>
         <img id="detail-weather" src="" alt="Weather Icon">
         <select id="edit-weather">
             <!-- 날씨 옵션은 동적으로 채워질 예정 -->
         </select>
-        <div id="detail-date"></div>
+        <select id="edit-emotion">
+            <!-- 감정 태그 옵션은 동적으로 채워질 예정 -->
+        </select>
         <div class="edit-buttons">
             <button id="edit-button">Edit</button>
             <button id="save-button" class="save" style="display: none;">Save</button>
             <button id="cancel-button" class="cancel" style="display: none;">Cancel</button>
-            <button id="delete-button" class="delete">Delete</button> <!-- 삭제 버튼 추가 -->
+            <button id="delete-button" class="delete">Delete</button>
         </div>
         <div class="back" onclick="goBack()">← Back to List</div>
     </div>
@@ -108,6 +114,7 @@
     <script>
         let isEditing = false;
         let weatherList = []; // 날씨 목록 저장
+        let emotionList = []; // 감정 목록 저장
 
         async function fetchDiaryDetail(id) {
             try {
@@ -124,7 +131,7 @@
 
         async function fetchWeatherList() {
             try {
-                const response = await fetch(`http://localhost:3000/weather`);
+                const response = await fetch(`http://localhost:3000/api/v1/weather`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -132,6 +139,19 @@
                 populateWeatherDropdown();
             } catch (error) {
                 console.error('Error fetching weather list:', error);
+            }
+        }
+
+        async function fetchEmotionList() {
+            try {
+                const response = await fetch(`http://localhost:3000/api/v1/emotions`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                emotionList = await response.json();
+                populateEmotionDropdown();
+            } catch (error) {
+                console.error('Error fetching emotion list:', error);
             }
         }
 
@@ -153,6 +173,20 @@
             });
         }
 
+        function populateEmotionDropdown() {
+            const emotionSelect = document.getElementById('edit-emotion');
+
+            // 기존 옵션 초기화
+            emotionSelect.innerHTML = '';
+
+            emotionList.forEach(emotion => {
+                const option = document.createElement('option');
+                option.value = emotion.id;
+                option.textContent = emotion.name;
+                emotionSelect.appendChild(option);
+            });
+        }
+
         function renderDiaryDetail(diary) {
             const basePath = 'http://localhost:3000/media/';
             const weatherIconPath = `${basePath}${diary.Weather.icon}`;
@@ -163,10 +197,15 @@
             document.getElementById('edit-content').value = diary.content;
             document.getElementById('detail-weather').src = weatherIconPath;
             document.getElementById('edit-weather').value = diary.weatherId; // 선택된 날씨 설정
+            document.getElementById('edit-emotion').value = diary.EmotionTags.length > 0 ? diary.EmotionTags[0].id : ''; // 감정 태그 설정
             document.getElementById('detail-date').innerHTML = `
         <strong>Created At:</strong> ${diary.created_at}<br>
         <strong>Updated At:</strong> ${diary.updated_at}
-      `;
+    `;
+
+            // 감정 태그 표시
+            const emotionText = diary.EmotionTags.map(tag => tag.name).join(', ') || '없음';
+            document.getElementById('detail-emotion').textContent = `Emotion Tags: ${emotionText}`;
         }
 
         function toggleEditMode(enable) {
@@ -177,6 +216,8 @@
             document.getElementById('edit-content').style.display = enable ? 'block' : 'none';
             document.getElementById('detail-weather').style.display = enable ? 'none' : 'block';
             document.getElementById('edit-weather').style.display = enable ? 'block' : 'none';
+            document.getElementById('detail-emotion').style.display = enable ? 'none' : 'block';
+            document.getElementById('edit-emotion').style.display = enable ? 'block' : 'none';
 
             document.getElementById('edit-button').style.display = enable ? 'none' : 'inline-block';
             document.getElementById('save-button').style.display = enable ? 'inline-block' : 'none';
@@ -187,6 +228,7 @@
             const updatedTitle = document.getElementById('edit-title').value;
             const updatedContent = document.getElementById('edit-content').value;
             const updatedWeatherId = document.getElementById('edit-weather').value;
+            const updatedEmotionId = document.getElementById('edit-emotion').value; // 감정 태그 추가
 
             try {
                 const response = await fetch(`http://localhost:3000/api/v1/diaries/${id}`, {
@@ -197,7 +239,8 @@
                     body: JSON.stringify({
                         title: updatedTitle,
                         content: updatedContent,
-                        weatherId: updatedWeatherId, // 날씨 정보 추가
+                        weatherId: updatedWeatherId,
+                        emotionTagId: updatedEmotionId, // 감정 정보 추가
                     }),
                 });
 
@@ -215,19 +258,7 @@
             }
         }
 
-        function goBack() {
-            window.location.href = 'test_read_diaries.html';
-        }
-
-        // URL에서 id 파라미터 가져오기
-        const params = new URLSearchParams(window.location.search);
-        const diaryId = params.get('id');
-        if (diaryId) {
-            fetchDiaryDetail(diaryId);
-            fetchWeatherList();
-        } else {
-            console.error('No diary ID provided in the URL.');
-        } async function deleteDiary(id) {
+        async function deleteDiary(id) {
             if (!confirm('정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
                 return;
             }
@@ -248,6 +279,21 @@
                 console.error('Error deleting diary:', error);
                 alert('다이어리 삭제에 실패했습니다.');
             }
+        }
+
+        function goBack() {
+            window.location.href = 'test_read_diaries.html';
+        }
+
+        // URL에서 id 파라미터 가져오기
+        const params = new URLSearchParams(window.location.search);
+        const diaryId = params.get('id');
+        if (diaryId) {
+            fetchDiaryDetail(diaryId);
+            fetchWeatherList();
+            fetchEmotionList(); // 감정 목록 가져오기
+        } else {
+            console.error('No diary ID provided in the URL.');
         }
 
         document.getElementById('edit-button').addEventListener('click', () => toggleEditMode(true));

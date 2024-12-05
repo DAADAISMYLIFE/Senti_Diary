@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { Diary, Weather } = require('../models');
+const { Diary, Weather, DiaryEmotion, EmotionTag } = require('../models');
 const { Op } = require('sequelize');
 
 
@@ -11,19 +11,26 @@ router.route('/')
         try {
             const diaries = await Diary.findAll({
                 attributes: ['id', 'userId', 'title', 'view_scope', 'created_at', 'updated_at'],
-                include: [{
-                    model: Weather,
-                    attributes: ['icon']
-                }]
+                include: [
+                    {
+                        model: Weather,
+                        attributes: ['icon'],
+                    },
+                    {
+                        model: EmotionTag, // EmotionTag를 포함
+                        attributes: ['id', 'name'], // 감정의 id와 name 필드만 포함
+                        through: { attributes: [] } // DiaryEmotion 중간 테이블의 데이터는 제외
+                    }
+                ],
+                order: [['created_at', 'DESC']],
             });
+
             res.status(200).json(diaries);
-        }
-        catch (error) {
+        } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Internal Server Error' });
         }
     })
-
     // 다이어리 작성
     .post(async (req, res) => {
         try {
@@ -36,12 +43,19 @@ router.route('/')
                 viewScope: jsonData.viewScope,
             });
 
-            console.log(jsonData.title);
+            console.log(jsonData);
+
+            // DiaryEmotion 테이블에 연결된 감정 태그 추가
+            if (jsonData.emotion && Array.isArray(jsonData.emotion)) {
+                // emotion 필드가 배열일 경우 처리
+                const emotionIds = jsonData.emotion; // emotion 배열: [1, 2, 3]
+                await createdDiary.addEmotionTags(emotionIds);
+            }
 
             // 응답으로 받은 데이터를 다시 전송합니다.
-            res.status(200).json({
+            res.status(201).json({
                 message: 'diary가 생성되었습니다.',
-                detail: createdDiary
+                diary: createdDiary
             });
         }
         catch (error) {
@@ -60,6 +74,10 @@ router.route('/:id')
                 include: [{
                     model: Weather,
                     attributes: ['icon']
+                }, {
+                    model: EmotionTag,
+                    attributes: ['id', 'name'],
+                    through: { attributes: [] }
                 }],
                 where: { id: req.params.id }
             });

@@ -39,9 +39,5 @@ class User extends Sequelize.Model {
             collate: 'utf8_general_ci',
         });
     }
-    
-    static associate(db) {
-        db.User.hasMany(db.Diary, { foreignKey: 'userId', sourceKey: 'id' });
-    }
 }
 module.exports = User;

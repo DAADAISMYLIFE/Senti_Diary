@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,28 +32,45 @@
       text-decoration: none;
     }
 
-    .diary .view-scope {
+    .diary .view-scope, .diary .date {
       font-size: 0.9em;
       color: #555;
     }
 
-    .diary .date {
+    .emotions {
+      margin-top: 10px;
       font-size: 0.9em;
-      color: #555;
+    }
+
+    .create-button {
+      display: block;
+      width: 200px;
+      padding: 10px;
+      margin: 20px auto;
+      text-align: center;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .create-button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
-
 <body>
   <h1>Diaries</h1>
   <div id="diary-list">
     <!-- Diary entries will be dynamically inserted here -->
   </div>
 
+  <a href="http://localhost:5500/test_create_diary.html" class="create-button">Create New Diary</a>
+
   <script>
     async function fetchDiaries() {
       try {
-        const response = await fetch('http://localhost:3000/api/v1/diaries'); // API 경로 수정 필요
+        const response = await fetch('http://localhost:3000/api/v1/diaries');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -67,7 +83,7 @@
 
     function renderDiaries(diaries) {
       const diaryList = document.getElementById('diary-list');
-      diaryList.innerHTML = ''; // 이전 데이터 초기화
+      diaryList.innerHTML = ''; // Clear existing data
 
       diaries.forEach(diary => {
         const diaryDiv = document.createElement('div');
@@ -76,6 +92,7 @@
         const basePath = 'http://localhost:3000/media/';
         const weatherIconPath = `${basePath}${diary.Weather.icon}`;
 
+        // Render diary entry
         diaryDiv.innerHTML = `
           <a href="test_read_diary.html?id=${diary.id}" class="title">${diary.title}</a>
           <div class="weather">
@@ -85,7 +102,10 @@
             <strong>View Scope:</strong> ${diary.view_scope === 1 ? 'Public' : 'Private'}
           </div>
           <div class="date">
-            <strong>Created At:</strong> ${diary.created_at}
+            <strong>Created At:</strong> ${new Date(diary.created_at).toLocaleString()}
+          </div>
+          <div class="emotions">
+            <strong>Emotions:</strong> ${diary.EmotionTags.map(tag => tag.name).join(', ') || 'None'}
           </div>
         `;
 
@@ -96,5 +116,4 @@
     fetchDiaries();
   </script>
 </body>
-
 </html>

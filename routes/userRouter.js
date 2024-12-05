@@ -59,7 +59,7 @@ router.get('/oauth/login', async (req, res) => {
     const code = req.query.code;
     const state = req.query.state;
     const access_token_url = `https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirectURI}&code=${code}&state=${state}`;
-
+    console.log('안녕');
     try {
         const token_res = await axios.get(access_token_url, {
             headers: {
@@ -79,8 +79,6 @@ router.get('/oauth/login', async (req, res) => {
                 'Authorization': header
             }
         });
-
-        console.log(user_info.data);
 
         const email = user_info.data.response.email;
         const nickname = user_info.data.response.nickname;
@@ -112,8 +110,6 @@ router.get('/oauth/login', async (req, res) => {
                 message: 'user가 생성되었습니다.',
                 detail: createdUser
             });
-
-            console.log('죽어');
         }
         else {
             // 성공 응답

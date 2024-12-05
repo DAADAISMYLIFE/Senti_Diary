@@ -24,7 +24,7 @@
         }
 
         .login-button {
-            background-color: #03c75a;
+            background-color: #e89a66;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -34,27 +34,21 @@
         }
 
         .login-button:hover {
-            background-color: #029c4b;
+            background-color: #c58459;
         }
     </style>
 </head>
 
 <body>
     <div class="login-container">
-        <h1>네이버 소셜 로그인</h1>
-        <button class="login-button" onclick="loginWithNaver()">네이버 로그인</button>
+        <h1>로그인 성공!</h1>
+        <button class="login-button" onclick="create_diary()">일기장</button>
     </div>
 
     <script>
-        function loginWithNaver() {
-            // 네이버 로그인 URL
-            const client_id = 'do7zAMR7B6f3yAasQvpB'; // 네이버 개발자 센터에서 발급받은 클라이언트 ID
-            const redirect_uri = encodeURIComponent('http://127.0.0.1:5500/test_redirect.html'); // 리다이렉트 URI
-            const state = 'random_state_string'; // CSRF 방지용 랜덤 문자열
-
-            const naverAuthUrl =
-                `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`;
-            window.location.href = naverAuthUrl; // 네이버 로그인 페이지로 리다이렉트
+        function create_diary() {
+            const redirect_uri = 'http://127.0.0.1:5500/test_create_diary.html'; // 리다이렉트 URI
+            window.location.href = redirect_uri; // 네이버 로그인 페이지로 리다이렉트
         }
     </script>
 </body>

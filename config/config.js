@@ -1,8 +1,8 @@
 require('dotenv').config();
 
 const development_sqlite = {
-  "dialect" : "sqlite",
-  "storage" : "./database.sqlite3"
+  "dialect": "sqlite",
+  "storage": "./database.sqlite3"
 };
 
 const development_mysql = {
@@ -14,11 +14,8 @@ const development_mysql = {
 };
 
 const test = {
-  "username": process.env.MYSQL_USERNAME,
-  "password": process.env.MYSQL_PASSWORD,
-  "database": process.env.MYSQL_DATABASE,
-  "host": process.env.MYSQL_HOST,
-  "dialect": "mysql"
+  "dialect": "sqlite",
+  "storage": "./database.sqlite3"
 };
 const production = {
   "username": process.env.MYSQL_USERNAME,
@@ -28,4 +25,4 @@ const production = {
   "dialect": "mysql"
 };
 
-module.exports = {development_sqlite, development_mysql, test, production};
+module.exports = { development_sqlite, development_mysql, test, production };

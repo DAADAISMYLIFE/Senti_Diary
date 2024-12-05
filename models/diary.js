@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-// 유저 모델
+// 다이어리 모델
 class Diary extends Sequelize.Model {
     static initiate(sequelize) {
         Diary.init({

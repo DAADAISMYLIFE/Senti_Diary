@@ -42,6 +42,7 @@ const upload = multer({
     }
 });
 
+// 유저 목록 조회
 router.get('/', async (req, res) => {
     try {
         const users = await User.findAll({
@@ -58,7 +59,8 @@ router.get('/', async (req, res) => {
 router.get('/oauth/login', async (req, res) => {
     const code = req.query.code;
     const state = req.query.state;
-    const access_token_url = `https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirectURI}&code=${code}&state=${state}`;
+    const access_token_url
+        = `https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirectURI}&code=${code}&state=${state}`;
     console.log('안녕');
     try {
         const token_res = await axios.get(access_token_url, {
@@ -105,14 +107,12 @@ router.get('/oauth/login', async (req, res) => {
                 profileImage: profile_image,
             });
 
-            // 성공 응답
             res.status(201).json({
-                message: 'user가 생성되었습니다.',
+                message: '회원가입이 되었습니다!',
                 detail: createdUser
             });
         }
         else {
-            // 성공 응답
             res.status(200).json({
                 message: '로그인 성공',
                 detail: `${nickname}님이 로그인 성공했습니다!`

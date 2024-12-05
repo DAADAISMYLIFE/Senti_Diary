@@ -43,8 +43,6 @@ router.route('/')
                 viewScope: jsonData.viewScope,
             });
 
-            console.log(jsonData);
-
             // DiaryEmotion 테이블에 연결된 감정 태그 추가
             if (jsonData.emotion && Array.isArray(jsonData.emotion)) {
                 // emotion 필드가 배열일 경우 처리
@@ -52,7 +50,7 @@ router.route('/')
                 await createdDiary.addEmotionTags(emotionIds);
             }
 
-            // 응답으로 받은 데이터를 다시 전송합니다.
+            // 응답으로 받은 데이터를 다시 전송
             res.status(201).json({
                 message: 'diary가 생성되었습니다.',
                 diary: createdDiary
@@ -123,4 +121,5 @@ router.route('/:id')
             res.status(500).json({ error: 'Internal Server Error' });
         }
     })
+    
 module.exports = router;

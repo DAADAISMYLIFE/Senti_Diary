@@ -22,7 +22,7 @@ app.use('/media', express.static('media'));
 
 sequelize.sync({ force: false })
     .then(() => {
-        console.log("DB 연결 성공");
+        // console.log("DB 연결 성공");
     })
     .catch((err) => {
         console.log(err);
@@ -51,7 +51,7 @@ app.get('/media/:file', (req, res) => {
 
 // 메인 랜딩 페이지
 app.get('/', (req, res) => {
-    res.send("Hello NodeJS");
+    res.json({ message: "Hello NodeJS" }); // JSON 형식으로 응답
 });
 
 // 유저 관련 URL
@@ -63,12 +63,12 @@ app.use('/api/v1/diaries', diaryRouter);
 // 날씨 관련 URL
 app.use('/api/v1/weather', weatherRouter);
 
-// 날씨 관련 URL
+// 감정 태그 관련 URL
 app.use('/api/v1/emotions', emotionRouter);
 
 // 이외의 URL 404 처리
 app.use((req, res, next) => {
-    res.status(404).send("404 NOT FOUND!");
+    res.status(404).json({ error: "404 NOT FOUND!" }); // JSON 형식으로 응답
 });
 
 // 500 서버 에러
@@ -81,3 +81,5 @@ app.use((err, req, res, next) => {
 app.listen(process.env.PORT || 3000, () => {
     console.log('http://localhost:3000 로 서버 실행 중...');
 });
+
+module.exports = app;

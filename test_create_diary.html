@@ -74,6 +74,8 @@
         if (response.ok) {
           document.getElementById('responseMessage').textContent = result.message || 'Diary 생성 성공!';
           document.getElementById('diaryForm').reset();
+          window.location.href = "http://localhost:5500/test_read_diaries.html";
+        
         } else {
           document.getElementById('errorMessage').textContent = result.error || '오류 발생';
         }

@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-// 유저 모델
+// 감정 태그 모델
 class EmotionTag extends Sequelize.Model {
     static initiate(sequelize) {
         EmotionTag.init({

@@ -41,7 +41,7 @@ class Diary extends Sequelize.Model {
     static associate(db) {
         db.Diary.belongsTo(db.User, { foreignKey: 'userId', targetKey: 'id' });
         db.Diary.belongsTo(db.Weather, { foreignKey: 'weatherId', targetKey: 'id' });
-        // 다이어리 감정 관계 추가
+        // 다이어리 감정 다대다 관계 추가
         db.Diary.belongsToMany(db.EmotionTag, { through: 'DiaryEmotion', foreignKey: 'diaryId' });
     }
 }

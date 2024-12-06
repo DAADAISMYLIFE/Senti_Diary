@@ -20,13 +20,19 @@ app.use(morgan('combined')); //배포
 app.use('/media', express.static('media'));
 
 
-sequelize.sync({ force: false })
-    .then(() => {
-        // console.log("DB 연결 성공");
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+// sequelize.sync({ force: false })
+//     .then(() => {
+//         // console.log("DB 연결 성공");
+//     })
+//     .catch((err) => {
+//         console.log(err);
+//     });
+
+if (process.env.NODE_ENV !== 'test') {
+    sequelize.sync({ force: false })
+        .then(() => console.log('DB 연결 성공'))
+        .catch((err) => console.error('DB 연결 실패:', err));
+}
 
 app.use((req, res, next) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');

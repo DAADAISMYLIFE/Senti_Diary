@@ -27,7 +27,7 @@ router.route('/')
 
             res.status(200).json(diaries);
         } catch (error) {
-            console.error(error);
+            //console.error(error);
             res.status(500).json({ error: 'Internal Server Error' });
         }
     })
@@ -68,7 +68,7 @@ router.route('/:id')
     .get(async (req, res) => {
         try {
             const diary = await Diary.findOne({
-                attributes: ['userId', 'title', 'content', 'view_scope', 'created_at', 'updated_at'],
+                attributes: ['id', 'userId', 'title', 'content', 'view_scope', 'created_at', 'updated_at'],
                 include: [{
                     model: Weather,
                     attributes: ['icon']

@@ -1,8 +1,7 @@
 const User = require('./user');
-const Diary = require('./diary');
 const Weather = require('./weather');
 const EmotionTag = require('./emotionTag');
-const SummaryTag = require('./summaryTag');
+const Diary = require('./diary');
 
 
 const fs = require('fs');
@@ -26,20 +25,16 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 db.User = User;
-db.Diary = Diary;
 db.Weather = Weather;
 db.EmotionTag = EmotionTag;
-db.SummaryTag = SummaryTag;
-
+db.Diary = Diary;
 
 User.initiate(sequelize);
-Diary.initiate(sequelize);
 Weather.initiate(sequelize);
 EmotionTag.initiate(sequelize);
-SummaryTag.initiate(sequelize);
+Diary.initiate(sequelize);
 
-Diary.associate(db);
 EmotionTag.associate(db);
-SummaryTag.associate(db);
+Diary.associate(db);
 
 module.exports = db;

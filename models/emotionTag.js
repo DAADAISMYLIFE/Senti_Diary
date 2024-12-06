@@ -18,7 +18,7 @@ class EmotionTag extends Sequelize.Model {
     }
 
     static associate(db) {
-        db.EmotionTag.belongsToMany(db.Diary, { through: 'DiaryEmotion', foreignKey: 'emotionTagId' });
+        db.EmotionTag.belongsToMany(db.Diary, { through: 'diary_emotion', foreignKey: 'emotionTagId' });
     };
 }
 

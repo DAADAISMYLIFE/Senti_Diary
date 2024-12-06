@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>네이버 소셜 로그인</title>
     <style>
         body {
@@ -12,49 +11,55 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f4;
+            margin: 0;
+            background-color: #f0f0f0;
         }
 
         .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .login-button {
-            background-color: #03c75a;
+        .naver-login-btn {
+            background-color: #2DB400;
             color: white;
-            padding: 10px 20px;
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-        }
-
-        .login-button:hover {
-            background-color: #029c4b;
         }
     </style>
 </head>
 
 <body>
     <div class="login-container">
-        <h1>네이버 소셜 로그인</h1>
-        <button class="login-button" onclick="loginWithNaver()">네이버 로그인</button>
+        <h2>로그인</h2>
+        <button class="naver-login-btn" onclick="naverLogin()">
+            네이버로 로그인
+        </button>
     </div>
 
     <script>
-        function loginWithNaver() {
-            // 네이버 로그인 URL
-            const client_id = 'do7zAMR7B6f3yAasQvpB'; // 네이버 개발자 센터에서 발급받은 클라이언트 ID
-            const redirect_uri = encodeURIComponent('http://127.0.0.1:5500/test_redirect.html'); // 리다이렉트 URI
-            const state = 'random_state_string'; // CSRF 방지용 랜덤 문자열
+        function naverLogin() {
+            // 네이버 로그인 OAuth URL
+            const NAVER_AUTH_URL = 'https://nid.naver.com/oauth2.0/authorize';
+            const CLIENT_ID = 'do7zAMR7B6f3yAasQvpB';
+            const REDIRECT_URI = 'http://localhost:3000/api/v1/users/oauth/login';
+            const STATE = generateRandomState();
 
-            const naverAuthUrl =
-                `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`;
-            window.location.href = naverAuthUrl; // 네이버 로그인 페이지로 리다이렉트
+            const authUrl = `${NAVER_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${STATE}`;
+
+            // 네이버 로그인 페이지로 리다이렉트
+            window.location.href = authUrl;
+        }
+
+        function generateRandomState() {
+            return Math.random().toString(36).substring(2, 15) +
+                Math.random().toString(36).substring(2, 15);
         }
     </script>
 </body>

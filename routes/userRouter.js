@@ -57,49 +57,47 @@ router.get('/', async (req, res) => {
 
 // 프론트에서 code와 state를 받아 쿼리 스트링에 담아 이 api를 호출해야 함
 router.get('/oauth/login', async (req, res) => {
-    const code = req.query.code;
-    const state = req.query.state;
-    const access_token_url
-        = `https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirectURI}&code=${code}&state=${state}`;
-    console.log('안녕');
+    const { code, state } = req.query;
+
     try {
-        const token_res = await axios.get(access_token_url, {
+        // 토큰 요청 (POST 메서드 사용)
+        const token_res = await axios.post('https://nid.naver.com/oauth2.0/token', null, {
+            params: {
+                grant_type: 'authorization_code',
+                client_id: client_id,
+                client_secret: client_secret,
+                redirect_uri: redirectURI,
+                code: code,
+                state: state
+            },
             headers: {
-                'X-Naver-Client-Id': client_id,
-                'X-Naver-Client-Secret': client_secret
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
 
-        // 요청이 제대로 되었을 경우 access_token을 발급함
-        // access_token을 'Bearer <토큰>'의 형식으로 네이버에 유저 정보 요청
-        const access_token = token_res.data.access_token
-        const header = `Bearer ${access_token}`; // Bearer 다음에 공백 추가
-        const user_info_url = 'https://openapi.naver.com/v1/nid/me';
+        const access_token = token_res.data.access_token;
+        const header = `Bearer ${access_token}`;
 
-        const user_info = await axios.get(user_info_url, {
+        // 사용자 정보 요청
+        const user_info = await axios.get('https://openapi.naver.com/v1/nid/me', {
             headers: {
                 'Authorization': header
             }
         });
 
-        const email = user_info.data.response.email;
-        const nickname = user_info.data.response.nickname;
-        const profile_image = user_info.data.response.profile_image;
+        const { email, nickname, profile_image } = user_info.data.response;
 
-        const user = await User.findOne({
-            attributes: ['email'],
-            where: { email: email }
-        });
+        // 사용자 찾기 또는 생성
+        let user = await User.findOne({ where: { email } });
 
-        // user_info가 db에 있으면(email로 검색) => 로그인
-        // user_info가 db에 없으면(email로 검색) => 회원가입
-        if (user == null) {
-            // 비밀번호 해시를 위한 솔트
+        if (!user) {
+            // 회원가입 로직
             const salt = crypto.randomBytes(128).toString('base64');
-            const hashPassword = crypto.createHash('sha512').update(email + nickname + profile_image + salt).digest('hex');
+            const hashPassword = crypto.createHash('sha512')
+                .update(email + nickname + profile_image + salt)
+                .digest('hex');
 
-            // 사용자 생성
-            const createdUser = await User.create({
+            user = await User.create({
                 email,
                 password: hashPassword,
                 passwordSalt: salt,
@@ -107,28 +105,46 @@ router.get('/oauth/login', async (req, res) => {
                 profileImage: profile_image,
             });
 
-            res.status(201).json({
-                message: '회원가입이 되었습니다!',
-                detail: createdUser
-            });
-        }
-        else {
-            res.status(200).json({
-                message: '로그인 성공',
-                detail: `${nickname}님이 로그인 성공했습니다!`
+            // // JWT 토큰 발행
+            // const token = jwt.sign(
+            //     { id: user.id, email: user.email },
+            //     process.env.JWT_SECRET,
+            //     { expiresIn: '1h' }
+            // );
+
+            return res.status(201).json({
+                message: '회원가입이 완료되었습니다!',
+                // token,
+                user: { id: user.id, email, nickname, profile_image }
             });
         }
 
-        ///////
+        // // 로그인 로직
+        // const token = jwt.sign(
+        //     { id: user.id, email: user.email },
+        //     process.env.JWT_SECRET,
+        //     { expiresIn: '1h' }
+        // );
+
+        res.status(200).json({
+            message: '로그인 성공',
+            // token,
+            user: { id: user.id, email, nickname, profile_image }
+        });
+
     } catch (error) {
+        console.error('OAuth 로그인 중 에러:', error);
+
+        // 상세한 에러 로깅
         if (error.response) {
             console.error('Error response:', error.response.data);
             console.error('Error status:', error.response.status);
-            res.status(error.response.status).json({ message: error.response.data });
-        } else {
-            console.error('Error message:', error.message);
-            res.status(500).json({ message: '서버 오류가 발생했습니다.' });
         }
+
+        res.status(500).json({
+            message: '서버 오류가 발생했습니다.',
+            error: error.message
+        });
     }
 });
 module.exports = router;

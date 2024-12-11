@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 일기 작성 도우미</title>
+  <link rel="stylesheet" href="diary_create.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>AI 일기 작성 도우미</h1>
+    <form id="diaryForm">
+      <label for="title">제목</label>
+      <input type="text" id="title" required>
+
+      <label for="content">내용</label>
+      <textarea id="content" required></textarea>
+
+      <div id="weather-section">
+        <label>
+          <input type="radio" name="weather" value="1" required> 맑음
+        </label>
+        <label>
+          <input type="radio" name="weather" value="2"> 구름
+        </label>
+        <label>
+          <input type="radio" name="weather" value="3"> 비
+        </label>
+      </div>
+      <label>감정 선택:</label>
+      <div id="emotion-section">
+        <!-- 감정 태그는 동적으로 로드됩니다 -->
+      </div>
+
+      <div class="button-group">
+        <button type="button" id="aiSummaryButton" class="button">AI 요약</button>
+        <button type="submit" id="submitButton" class="button" disabled>작성</button>
+      </div>
+
+      <div id="response">
+        <h3>AI 요약</h3>
+        <p id="summary">AI 요약이 여기에 표시됩니다.</p>
+        <h3>감정 키워드</h3>
+        <p id="keywords">키워드가 여기에 표시됩니다.</p>
+      </div>
+    </form>
+    <p id="errorMessage"></p>
+  </div>
+
+  <script>
+    const apiKey = 'API_KEY넣기';
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    const aiSummaryButton = document.getElementById('aiSummaryButton');
+    const submitButton = document.getElementById('submitButton');
+    const summaryElement = document.getElementById('summary');
+    const keywordsElement = document.getElementById('keywords');
+    const errorMessageElement = document.getElementById('errorMessage');
+    const diaryForm = document.getElementById('diaryForm');
+    const emotionSection = document.getElementById('emotion-section');
+
+    // 감정 태그 로드 함수
+    async function loadEmotions() {
+      try {
+        const response = await fetch('http://localhost:3000/api/v1/emotions');
+        if (response.ok) {
+          const emotions = await response.json();
+          emotions.forEach(({ id, name }) => {
+            const checkboxContainer = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'emotion';
+            checkbox.value = id;
+
+            const textNode = document.createTextNode(name);
+            //TODO : 선택된 것들 초기화
+
+
+
+            // 기본적으로 특정 감정을 자동 선택 (예: 기쁨)
+            // if (id === 1) { // 기쁨의 ID가 1이라고 가정
+            //   checkbox.checked = true; // 자동으로 선택
+            //   checkboxContainer.classList.add('checked'); // 스타일 적용
+            // }
+
+            // 체크박스 클릭 시 색상 변경
+            checkbox.addEventListener('change', () => {
+              if (checkbox.checked) {
+                checkboxContainer.classList.add('checked');
+              } else {
+                checkboxContainer.classList.remove('checked');
+              }
+            });
+
+            checkboxContainer.appendChild(checkbox);
+            checkboxContainer.appendChild(textNode);
+            emotionSection.appendChild(checkboxContainer);
+          });
+        }
+      } catch (error) {
+        console.error('감정 로드 실패', error);
+        errorMessageElement.textContent = '감정 태그를 불러오는 데 실패했습니다.';
+      }
+    }
+
+    // 페이지 로드 시 감정 태그 로드
+    window.onload = loadEmotions;
+
+    // AI 요약 버튼 클릭 이벤트
+    aiSummaryButton.addEventListener('click', async () => {
+      const content = document.getElementById('content').value;
+
+      if (!content) {
+        errorMessageElement.textContent = '일기 내용을 입력해주세요.';
+        return;
+      }
+
+      aiSummaryButton.disabled = true;
+      summaryElement.textContent = '요청을 처리 중입니다...';
+      keywordsElement.textContent = '';
+      errorMessageElement.textContent = '';
+
+      const requestBody = {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `
+          당신은 한국어로만 응답하는 유능한 비서입니다. 사용자의 일기에 대해 반드시 아래 형식으로 응답하세요.
+          형식:
+          요약: [사용자의 하루일기를 키워드 형태로, 1개~5개 이하로 출력하세요.]
+          키워드: [일기에서 나타나는 주요감정을 다음 감정 목록 중에서 1개~3개 선택하여 그 정수로 된 ID를 출력하세요.(기쁨=1, 슬픔=2, 행복=2, 화남=3, 즐거움=4, 행복=5, 불안=6, 아쉬움=7, 우울함=8, 심심함=9)]
+          주의: 반드시 위의 형식을 유지하세요.
+        `
+          },
+          {
+            role: 'user',
+            content: `다음 일기에 대해 요약하고 키워드를 생성하세요: ${content}`
+          }
+        ],
+        temperature: 0.5
+      };
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          throw new Error(`API 호출 실패: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const result = data.choices[0].message.content;
+
+        let summary = '';
+        let keywords = '';
+
+        if (result.includes('키워드:')) {
+          const parts = result.split('키워드:');
+          summary = parts[0].replace('요약:', '').trim();
+          keywords = parts[1] ? parts[1].trim() : '키워드가 생성되지 않았습니다.';
+        } else {
+          summary = result.trim();
+        }
+
+        summaryElement.innerText = summary;
+        keywordsElement.innerText = keywords;
+        submitButton.disabled = false;
+
+        // 키워드에서 감정 ID 추출
+        const emotionIds = keywords.split(',').map(id => parseInt(id.trim(), 10));
+
+        // 감정 체크박스 자동 선택
+        emotionIds.forEach(id => {
+          const checkbox = document.querySelector(`input[name="emotion"][value="${id}"]`);
+          if (checkbox) {
+            checkbox.checked = true;
+            checkbox.parentElement.classList.add('checked'); // 스타일 적용
+          }
+        });
+
+      } catch (error) {
+        console.error('Error:', error);
+        errorMessageElement.innerText = '오류가 발생했습니다. 다시 시도하세요.';
+      } finally {
+        aiSummaryButton.disabled = false;
+      }
+    });
+
+    diaryForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      const weather = parseInt(document.querySelector('input[name="weather"]:checked').value, 10);
+      const summary = summaryElement.innerText;
+      const keywords = keywordsElement.innerText;
+
+      // 선택된 감정 태그 ID 수집
+      const selectedEmotions = Array.from(
+        document.querySelectorAll('input[name="emotion"]:checked')
+      ).map(checkbox => parseInt(checkbox.value, 10));
+
+      try {
+        const response = await fetch('http://localhost:3000/api/v1/diaries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            content,
+            weather,
+            emotion: selectedEmotions, // 감정 태그 ID 배열 전송
+            viewScope: true  // 기본값으로 공개 설정
+          })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          window.location.href = "http://localhost:5500/test_read_diaries.html";
+        } else {
+          errorMessageElement.textContent = result.error || '일기 생성 중 오류 발생';
+        }
+      } catch (error) {
+        console.error(error);
+        errorMessageElement.textContent = '서버와 연결 실패';
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -10,6 +10,7 @@ const userRouter = require("./routes/userRouter.js");
 const diaryRouter = require("./routes/diaryRouter.js");
 const weatherRouter = require("./routes/weatherRouter.js");
 const emotionRouter = require("./routes/emotionRouter.js");
+const openaiRouter = require("./routes/openaiRouter.js");
 const app = express();
 
 app.use(cors());
@@ -71,6 +72,9 @@ app.use('/api/v1/weather', weatherRouter);
 
 // 감정 태그 관련 URL
 app.use('/api/v1/emotions', emotionRouter);
+
+// 감정 태그 관련 URL
+app.use('/api/v1/openai', openaiRouter);
 
 // 이외의 URL 404 처리
 app.use((req, res, next) => {

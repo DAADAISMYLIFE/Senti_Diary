@@ -1,0 +1,161 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    color: #666;
+    font-weight: 600;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Button Styles */
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#aiSummaryButton {
+    background-color: #4CAF50;
+}
+
+#aiSummaryButton:hover {
+    background-color: #45a049;
+}
+
+#submitButton {
+    background-color: #007bff;
+}
+
+#submitButton:hover {
+    background-color: #0056b3;
+}
+
+#response {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+}
+
+#response h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#errorMessage {
+    color: red;
+    text-align: center;
+}
+
+/* Weather Section */
+#weather-section {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    justify-content: space-around;
+}
+
+#weather-section label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Emotion Section */
+#emotion-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#emotion-section label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+#emotion-section label:hover {
+    background-color: #e6e6e6;
+    border-color: #ccc;
+}
+
+#emotion-section input[type="checkbox"] {
+    display: none;
+    /* 체크박스를 숨김 */
+}
+
+/* 체크박스가 선택되었을 때 라벨 스타일 */
+#emotion-section input[type="checkbox"]:checked+label {
+    background-color: #007bff;
+    /* 선택된 배경색 */
+    color: white;
+    /* 선택된 텍스트 색상 */
+    border-color: #0056b3;
+    /* 선택된 테두리 색상 */
+}
+
+.checked {
+    background-color: #4caf50; /* 원하는 색상으로 변경 */
+    color: rgb(255, 0, 0); /* 텍스트 색상 변경 */
+    border-radius: 5px; /* 모서리 둥글게 */
+  }
